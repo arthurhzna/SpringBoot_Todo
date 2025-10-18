@@ -54,6 +54,7 @@ public class JwtSecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
+                    // .formLogin(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.
                 	sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -78,7 +79,7 @@ public class JwtSecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("in28minutes")
+        UserDetails user = User.withUsername("arthur")
                                 .password("{noop}dummy")
                                 .authorities("read")
                                 .roles("USER")
