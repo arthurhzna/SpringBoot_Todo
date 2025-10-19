@@ -32,12 +32,53 @@ Before running this application, make sure you have:
 
 ## ⚙️ Configuration
 
-The application is configured to connect to a PostgreSQL database. Configuration can be found in `src/main/resources/application.properties`:
+### Database Configuration
+
+⚠️ **IMPORTANT**: Never commit `application.properties` with real credentials to Git!
+
+1. Copy the example configuration file:
+```bash
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+```
+
+2. Update `application.properties` with your actual database credentials:
+```properties
+spring.datasource.url=jdbc:postgresql://YOUR_HOST:5432/YOUR_DATABASE
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
+```
+
+### Environment Variables (Recommended for Production) 🔒
+
+For better security, use environment variables instead of hardcoding credentials in `application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://34.50.114.92:5432/todo
-spring.datasource.username=todo
-spring.datasource.password=_i7Ig\_HphtF+hac
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/todo}
+spring.datasource.username=${DB_USERNAME:todo}
+spring.datasource.password=${DB_PASSWORD}
+```
+
+Then set the environment variables:
+
+**Linux/Mac:**
+```bash
+export DB_URL=jdbc:postgresql://your-host:5432/your-database
+export DB_USERNAME=your-username
+export DB_PASSWORD=your-password
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:DB_URL="jdbc:postgresql://your-host:5432/your-database"
+$env:DB_USERNAME="your-username"
+$env:DB_PASSWORD="your-password"
+```
+
+**Windows (CMD):**
+```cmd
+set DB_URL=jdbc:postgresql://your-host:5432/your-database
+set DB_USERNAME=your-username
+set DB_PASSWORD=your-password
 ```
 
 ### Database Schema
@@ -202,6 +243,21 @@ This application uses two authentication methods:
 2. **Basic Authentication** - For testing/development
    - Username and password in request headers
    - Simpler but less secure
+
+### Security Best Practices ⚠️
+
+**NEVER commit sensitive data to Git:**
+- ❌ Database credentials
+- ❌ API keys
+- ❌ JWT secret keys
+- ❌ Production passwords
+
+**DO instead:**
+- ✅ Use environment variables for sensitive data
+- ✅ Add `application.properties` to `.gitignore`
+- ✅ Use `application.properties.example` as a template
+- ✅ Rotate passwords if accidentally exposed
+- ✅ Use secret management tools (AWS Secrets Manager, HashiCorp Vault, etc.) in production
 
 ## 🌐 CORS Configuration
 
