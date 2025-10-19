@@ -25,6 +25,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -49,7 +52,7 @@ public class JwtSecurityConfig {
         return httpSecurity
                 .authorizeHttpRequests(auth -> auth
                 	.requestMatchers("/authenticate").permitAll()
-                	.requestMatchers(PathRequest.toH2Console()).permitAll() // h2-console is a servlet and NOT recommended for a production
+                	// .requestMatchers(PathRequest.toH2Console()).permitAll() // h2-console is a servlet and NOT recommended for a production
                     .requestMatchers(HttpMethod.OPTIONS,"/**")
                     .permitAll()
                     .anyRequest()
@@ -65,27 +68,50 @@ public class JwtSecurityConfig {
 //                .headers(header -> { // Deprecated in SB 3.1.x
 //                    header.frameOptions().sameOrigin();
 //                })
-                .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)) // Starting from SB 3.1.x using Lambda DSL
+                // .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)) // Starting from SB 3.1.x using Lambda DSL
                 .build();
     }
 
+    // @Bean
+    // public AuthenticationManager authenticationManager(
+    //     UserDetailsService userDetailsService) {
+    //     var authenticationProvider = new DaoAuthenticationProvider();
+    //     authenticationProvider.setUserDetailsService(userDetailsService);
+
+    //     return new ProviderManager(authenticationProvider);
+    // }
+
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService) {
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
         var authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
-
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        
         return new ProviderManager(authenticationProvider);
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("arthur")
-                                .password("{noop}dummy")
-                                .authorities("read")
-                                .roles("USER")
-                                .build();
+    // @Bean
+    // public UserDetailsService userDetailsService() {
+    //     UserDetails user = User.withUsername("arthur")
+    //                             .password("{noop}dummy")
+    //                             .authorities("read")
+    //                             .roles("USER")
+    //                             .build();
 
-        return new InMemoryUserDetailsManager(user);
+    //     return new InMemoryUserDetailsManager(user);
+    // }
+
+    // @Bean
+    // public PasswordEncoder passwordEncoder() {
+    //     return new BCryptPasswordEncoder();
+    // }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        // Development only - plain text password (NO encoding)
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
